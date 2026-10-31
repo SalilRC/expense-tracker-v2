@@ -1,0 +1,10 @@
+{
+  "name": "expense-tracker-v2",
+  "version": "0.1.0",
+  "description": "Personal expense tracker — vanilla JS, SDD with Spec Kit",
+  "scripts": {
+    "test": "jest --coverage",
+    "lint": "eslint modules/ app.js"
+  },
+  "devDependencies": {}
+}
