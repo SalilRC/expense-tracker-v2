@@ -1,50 +1,65 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+Version change: unversioned scaffold → 1.0.0
+Modified principles:
+- Principle 1 template placeholder → Spec Before Code
+- Principle 2 template placeholder → Vanilla JavaScript in Stage 1
+- Principle 3 template placeholder → Pure Logic and DOM Separation
+- Principle 4 template placeholder → Testable Completion
+- Principle 5 template placeholder → Consistent User-Facing Conventions
+Added sections: Stage 1 Constraints; Development Workflow
+Removed sections: None
+Follow-up TODOs: Confirm the original ratification date.
+-->
+# Expense Tracker Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Spec Before Code
+Every feature MUST have a feature specification artifact in `.specify/` before implementation
+begins. Implementation MUST follow the approved specification; material scope or behavior changes
+MUST be reflected in the specification before the corresponding code changes.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Vanilla JavaScript in Stage 1
+Stage 1 MUST use browser-native HTML, CSS, and JavaScript. External JavaScript frameworks and
+build tools are prohibited in this stage. This keeps the application browser-only and simple to run.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Pure Logic and DOM Separation
+Business, validation, CSV, and analytics logic MUST live in testable functions in `modules/`;
+domain calculations and transformations MUST be pure. Stateful expense CRUD belongs in
+`modules/store.js`. DOM manipulation and rendering MUST occur only in `modules/ui.js`, keeping
+logic independently testable and preventing rendering concerns from leaking into the domain.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Testable Completion
+Tests MUST cover every pure logic function before its story is marked Done. Tests MUST be written
+and run for new or changed behavior. Jest tests belong in `tests/`; `modules/csv.js` and
+`modules/analytics.js` MUST each maintain at least 80% line coverage.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Consistent User-Facing Conventions
+All monetary values MUST be represented in Indian Rupees and formatted with
+`toLocaleString('en-IN')`. Dates MUST be displayed as `DD-MMM-YYYY`. The application MUST NOT use
+browser `alert()`, `confirm()`, or `prompt()` dialogs; confirmations and feedback MUST use inline UI.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Stage 1 Constraints
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+Stage 1 is a browser-only single-page application with no backend or database. Expense records
+MUST conform to the project data model: UUID string ID, name, supported category, `YYYY-MM-DD` date,
+positive INR amount, and ISO 8601 creation timestamp. Stage 1 MUST NOT introduce frameworks,
+bundlers, or build tools.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development Workflow
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+Branches for epic work MUST follow `ET-[epic-number]-short-description`, for example
+`ET-2-expense-entry-and-log-view`. Each story MUST be implemented against its specification, and
+its required tests MUST pass before the story is marked Done.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution governs project specifications, implementation, and review. To amend it, update
+this document, increment its semantic version, and record the impact in the Sync Impact Report
+while preparing the amendment. Reviewers MUST verify that specifications, code, and tests comply
+with these principles; deviations require an explicit constitution amendment before implementation.
+Versioning follows SemVer: MAJOR for incompatible governance changes, MINOR for added principles
+or materially expanded requirements, and PATCH for clarifications and non-semantic refinements.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE): original adoption date unknown | **Last Amended**: 2026-10-31
