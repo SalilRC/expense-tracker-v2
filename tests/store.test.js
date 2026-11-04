@@ -1,4 +1,9 @@
-import { addExpense, getExpenses } from '../modules/store.js';
+import {
+  addExpense,
+  deleteExpense,
+  getExpenses,
+  updateExpense,
+} from '../modules/store.js';
 
 const validExpense = {
   name: 'Weekly groceries',
@@ -71,5 +76,64 @@ describe('expense store', () => {
     expenses.pop();
 
     expect(getExpenses()).toHaveLength(expenses.length + 1);
+  });
+
+  test('updates an expense by ID and preserves its ID, timestamp, and precision', () => {
+    const added = addExpense({ ...validExpense, amount: '0.015' }).expense;
+    const result = updateExpense(added.id, {
+      ...validExpense,
+      name: 'Updated expense',
+      amount: '1.239',
+    });
+
+    expect(result.errors).toEqual({});
+    expect(result.expense).toEqual({
+      ...added,
+      name: 'Updated expense',
+      amount: 1.239,
+    });
+    expect(getExpenses().find(({ id }) => id === added.id)).toEqual(result.expense);
+  });
+
+  test('rejects invalid updates without changing the existing expense', () => {
+    const added = addExpense(validExpense).expense;
+    const before = getExpenses();
+
+    const result = updateExpense(added.id, { ...validExpense, amount: '0' });
+
+    expect(result.expense).toBeNull();
+    expect(result.errors.amount).toEqual(expect.any(String));
+    expect(getExpenses()).toEqual(before);
+  });
+
+  test('reports an unknown expense ID without changing state', () => {
+    const before = getExpenses();
+
+    const result = updateExpense('missing-id', validExpense);
+
+    expect(result.expense).toBeNull();
+    expect(result.errors.id).toEqual(expect.any(String));
+    expect(getExpenses()).toEqual(before);
+  });
+
+  test('deletes only the matching expense and preserves collection order', () => {
+    const first = addExpense(validExpense).expense;
+    const second = addExpense({ ...validExpense, name: 'Second' }).expense;
+
+    const result = deleteExpense(first.id);
+
+    expect(result.deleted).toBe(true);
+    expect(result.expense).toEqual(first);
+    expect(getExpenses().filter(({ id }) => id === second.id)).toHaveLength(1);
+    expect(getExpenses().some(({ id }) => id === first.id)).toBe(false);
+  });
+
+  test('reports an unknown delete ID without changing state', () => {
+    const before = getExpenses();
+
+    const result = deleteExpense('missing-id');
+
+    expect(result.deleted).toBe(false);
+    expect(getExpenses()).toEqual(before);
   });
 });

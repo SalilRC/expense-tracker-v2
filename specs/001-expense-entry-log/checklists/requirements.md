@@ -1,7 +1,7 @@
-# Specification Quality Checklist: Add an Expense Entry (ET-3)
+# Specification Quality Checklist: Expense Entry and Log View (ET-2)
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-11-01
+**Created**: 2026-11-04
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
@@ -31,7 +31,7 @@
 
 ## Notes
 
-- This specification covers only ET-3. It includes the minimal log display required for accepted entries to be visible.
-- ET-4 full log behavior, ET-5 editing, ET-6 deletion, and ET-7 analytics are explicitly deferred and will require their own specifications and plans.
-- The ET-3 log uses date-descending order and insertion order descending for ties. Display dates use `DD-MMM-YYYY`; INR amounts use Indian number formatting.
+- ET-3 is complete and retained as context. ET-4 through ET-7 are detailed using their Jira story names and acceptance criteria.
+- The ET-6 category-month deletion outcome is resolved consistently with ET-7: show ₹0.00 when the month remains; remove the month column when no expenses remain for that month.
+- Requirements and success criteria are testable, technology-agnostic, and bounded to the ET-2 epic.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`.

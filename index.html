@@ -72,13 +72,21 @@
             <span id="amount-error" aria-live="polite"></span>
           </div>
 
-          <button type="submit">Add Expense</button>
+          <div class="form-actions">
+            <button type="submit">Add Expense</button>
+            <button id="cancel-edit" type="button" hidden>Cancel</button>
+          </div>
         </form>
       </section>
 
       <section aria-labelledby="expense-log-heading">
         <h2 id="expense-log-heading">Expense Log</h2>
         <div id="expense-log"></div>
+      </section>
+
+      <section aria-labelledby="expense-summary-heading">
+        <h2 id="expense-summary-heading">Category × Month Summary</h2>
+        <div id="expense-summary"></div>
       </section>
     </main>
 

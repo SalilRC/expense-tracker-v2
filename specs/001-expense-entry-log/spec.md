@@ -1,72 +1,152 @@
-# Feature Specification: Add an Expense Entry (ET-3)
+# Feature Specification: Expense Entry and Log View (ET-2)
 
-**Feature Branch**: `ET-2-expense-entry-and-log-view` (parent epic branch; not created)
+**Feature Branch**: `ET-2-expense-entry-and-log-view`
 
-**Created**: 2026-11-01
+**Created**: 2026-11-04
 
 **Status**: Draft
 
-**Input**: Jira story ET-3, “Add an Expense Entry.” This specification covers only adding an expense and displaying accepted entries in the basic expense log. The remaining ET-2 epic stories are explicitly deferred.
+**Input**: Jira epic ET-2, “Expense entry and log view,” and its child stories ET-3 through ET-7. ET-3 is complete; this specification records its scope and details the remaining stories without changing their Jira names or boundaries.
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Add an Expense Entry (Priority: P1)
+### User Story 1 - Add an Expense Entry (ET-3, Complete) (Priority: P1)
 
 As a user, I want to fill in an expense form and submit it, so that the expense is recorded and visible in my expense log.
 
-**Why this priority**: Adding an expense is the first step to creating a record in the log.
+**Why this priority**: Adding an expense creates the records that the log and summary show.
 
-**Independent Test**: Submit valid expense details and verify the submitted entry appears in the log in the required order, the form resets, and the page does not reload; submit invalid details and verify per-field inline errors and that no entry is added.
+**Independent Test**: Submit valid and invalid expense details; verify that valid entries appear in the log, invalid entries are rejected with field-specific feedback, and successful submission resets the form without reloading the page.
 
 **Acceptance Scenarios**:
 
-1. **Given** the expense form is available, **When** the user submits a name, one of the supported categories, a valid date, and an amount of at least ₹0.01, **Then** the new entry appears immediately in the expense log's date-descending order (with the newest entry first among entries with the same date), and the form resets to its default values.
-2. **Given** the name, category, date, or amount is missing, the date is invalid, or the amount is not greater than zero, **When** the user submits the form, **Then** inline errors appear for the invalid fields, the form is not submitted, and the expense log remains unchanged.
-3. **Given** the user enters a valid future date or submits an entry that duplicates another, **When** the user submits the otherwise valid form, **Then** the entry is accepted and displayed.
-4. **Given** the user submits a valid entry, **When** the entry is recorded, **Then** the page does not reload and the expense remains in in-memory state for the current page session.
+1. **Given** the expense form is available, **When** the user submits a name, one of the supported categories, a valid date, and an amount of at least ₹0.01, **Then** the new entry appears immediately in the basic log and the form resets to its defaults.
+2. **Given** one or more required fields are missing or invalid, **When** the user submits the form, **Then** inline errors identify the invalid fields and no expense is added.
+3. **Given** the user enters a valid future date or submits an otherwise valid duplicate, **When** the user submits the form, **Then** the expense is accepted.
+4. **Given** the user submits a valid entry, **When** it is recorded, **Then** the page does not reload and the expense remains available for the current page session.
 
-### Deferred Epic Stories
+### User Story 2 - Expense Log Table (ET-4) (Priority: P1)
 
-The following stories belong to the parent ET-2 epic but are not part of this ET-3 specification. Their detailed requirements will be specified and planned separately:
+As a user, I want to see all my expenses in a table sorted newest-first, so that I have a clear log of what I’ve recorded.
 
-- **ET-4 - Expense Log Table**: full log columns/actions, empty state, large-list behavior, and mobile scrolling.
-- **ET-5 - Edit an Expense Row**: editing, cancellation, and edit-mode behavior.
-- **ET-6 - Delete an Expense Row**: inline confirmation and deletion behavior.
-- **ET-7 - Category × Month Summary Table**: category/month sums, totals, and responsive behavior.
+**Why this priority**: The complete log is the primary way to review and act on recorded expenses.
 
-ET-3 includes only the basic log display needed to show newly accepted entries. It does not include editing, deletion, the full ET-4 log requirements, or analytics.
+**Independent Test**: View the log with zero, one, and at least 50 expenses; verify its columns, ordering, amount display, actions, and narrow-screen usability.
+
+**Acceptance Scenarios**:
+
+1. **Given** there are no expenses, **When** the user views the log, **Then** the table area displays “No expenses recorded yet.”
+2. **Given** one or more expenses exist, **When** the user views the log, **Then** each row shows `#`, Expense Name, Category, Date, Amount, and Actions with Edit and Delete actions.
+3. **Given** multiple expenses exist, **When** the log is displayed, **Then** entries are ordered by expense date descending and by entry order descending when dates match.
+4. **Given** the log contains one or at least 50 expenses, **When** it is displayed, **Then** all entries remain available in the table.
+5. **Given** the user views the table on a mobile-width screen, **When** its content is wider than the viewport, **Then** the table can be scrolled horizontally without making the page layout overflow.
+6. **Given** amounts have different digit widths, **When** the user views the Amount column, **Then** digits align consistently and amounts display in INR with exactly two decimal places.
+
+### User Story 3 - Edit an Expense Row (ET-5) (Priority: P2)
+
+As a user, I want to edit any existing expense entry inline or via the form, so that I can correct mistakes.
+
+**Why this priority**: Editing lets users correct an existing record without deleting and re-entering it.
+
+**Independent Test**: Edit an expense, cancel an edit, change an expense date, and attempt to switch edit mode to another row; verify values, row order, and edit state.
+
+**Acceptance Scenarios**:
+
+1. **Given** an expense row is displayed, **When** the user selects Edit, **Then** its values populate the expense form, its row is visually highlighted, and the submit button reads “Update Expense.”
+2. **Given** an expense is being edited, **When** the user submits valid changes, **Then** that row is updated in place and the log is re-sorted if its date changed.
+3. **Given** an expense is being edited, **When** the user selects Cancel, **Then** no expense data changes and the form returns to blank add mode.
+4. **Given** an edit is active on one row, **When** the user selects Edit on another row, **Then** the second row replaces the first as the sole row in edit mode.
+5. **Given** the user submits an edit with missing or invalid values, **When** validation runs, **Then** the same required-field, category, date, and minimum-amount rules as ET-3 apply and no invalid update is saved.
+
+### User Story 4 - Delete an Expense Row (ET-6) (Priority: P2)
+
+As a user, I want to delete an expense entry, so that I can remove incorrect or duplicate records.
+
+**Why this priority**: Deletion gives users control to remove entries they no longer want included in their records.
+
+**Independent Test**: Start a deletion, cancel it, and confirm a deletion; verify the row and all affected summary values and month columns.
+
+**Acceptance Scenarios**:
+
+1. **Given** an expense row is displayed, **When** the user selects Delete, **Then** an inline prompt in that row asks “Delete this entry?” and offers Confirm and Cancel, without opening a browser confirmation dialog.
+2. **Given** the inline deletion prompt is shown, **When** the user selects Cancel, **Then** the expense and summary remain unchanged.
+3. **Given** the inline deletion prompt is shown, **When** the user selects Confirm, **Then** the expense is removed and the log and category-by-month summary update immediately.
+4. **Given** deleting the expense leaves its category-month total with no matching expenses while other expenses remain in that month, **When** the summary updates, **Then** that cell displays ₹0.00.
+5. **Given** deleting the expense removes the last expense for a month, **When** the summary updates, **Then** that month column is removed.
+
+### User Story 5 - Category × Month Summary Table (ET-7) (Priority: P3)
+
+As a user, I want to see a summary table of spending by category and month, so that I can track where my money goes over time.
+
+**Why this priority**: The summary provides a cross-category and month-by-month view of spending after expense records and log actions are available.
+
+**Independent Test**: Use expenses in multiple categories and months; verify every category, monthly and overall totals, live updates, and horizontal navigation on narrow screens.
+
+**Acceptance Scenarios**:
+
+1. **Given** expenses exist in one or more months, **When** the user views the summary, **Then** it shows one row for each of the eight categories, one column per month containing at least one expense in chronological order, and a rightmost Total column.
+2. **Given** a category has expenses in a month, **When** its summary cell is displayed, **Then** the cell equals the sum of those expenses and is formatted as ₹X,XXX.00.
+3. **Given** a category has expenses across multiple months, **When** its Total cell is displayed, **Then** it equals the sum of that category’s expenses across all months.
+4. **Given** the summary is displayed, **When** the user views its bottom row, **Then** “Grand Total” shows each month’s sum across categories and the overall sum in the Total column.
+5. **Given** there are no expenses, **When** the user views the summary, **Then** all eight categories appear with ₹0.00 in a Total column and no month columns.
+6. **Given** the user adds an expense in a month not already shown, **When** the summary updates, **Then** a column for that month appears in chronological order.
+7. **Given** the user adds, edits, or deletes an expense, **When** the change is recorded, **Then** affected summary values and totals update immediately.
+8. **Given** the summary is wider than the viewport, **When** the user views it on a narrow screen, **Then** it can be scrolled horizontally and the category column remains visible.
 
 ### Edge Cases
 
-- Expense entry validation is tested with empty fields, zero amount, invalid date, future date, and a duplicate entry.
-- Multiple entries with the same expense date are shown in reverse insertion order.
-- Invalid submission leaves both the expense store and visible log unchanged.
+- Invalid ET-3 input must leave the expense collection, log, and summary unchanged.
+- Expenses on the same date must follow entry order descending in the log.
+- A date change during editing can change the row’s position in the log and the expense’s month in the summary.
+- Deleting the last expense in a category-month intersection sets that cell to ₹0.00 if the month still has entries; deleting the last expense for the month removes that month column.
+- Adding a new expense month introduces its summary column in chronological position.
+- Empty states for the log and summary are distinct: the log shows its empty message, while the summary shows eight zero-valued categories and a Total column.
+- Tables with wide content must remain usable on mobile-sized screens without breaking the page layout.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001 (ET-3)**: The expense form MUST collect Expense Name, Category, Expense Date, and Amount in ₹. Name, category, date, and amount MUST be required. The category choices MUST be Groceries, Outside Food, Fuel, Travel, Leisure, Medicines, Utilities, and Others. The date MUST default to today.
-- **FR-002 (ET-3)**: On submission, required fields MUST be present, the date MUST be valid, and the amount MUST be greater than zero and at least ₹0.01.
-- **FR-003 (ET-3)**: When validation fails, inline errors MUST appear per invalid field and the form MUST NOT be submitted. Future dates and duplicate entries MUST be allowed.
-- **FR-004 (ET-3)**: On successful submission, exactly one new entry MUST be added to in-memory state and appear immediately in the expense log in date-descending order, with newest insertion first for equal dates. The log MUST display dates as DD-MMM-YYYY and INR amounts with Indian number formatting. The form MUST reset to its default values and the page MUST NOT reload.
+- **FR-001 (ET-3)**: The expense entry form MUST collect Expense Name, Category, Expense Date, and Amount in ₹. All four fields MUST be required. The category choices MUST be Groceries, Outside Food, Fuel, Travel, Leisure, Medicines, Utilities, and Others. The date MUST default to the user's local current date.
+- **FR-002 (ET-3)**: A submitted expense MUST have a non-empty name, one supported category, a valid calendar date, and a finite amount of at least ₹0.01. Future dates and duplicate entries MUST be allowed.
+- **FR-003 (ET-3)**: Invalid submissions MUST show an inline error for each invalid field and MUST NOT add an expense. A valid submission MUST add exactly one expense, show it immediately in the basic log, reset the form to its defaults, and MUST NOT reload the page.
+- **FR-004 (ET-3)**: The basic log MUST display expense name, category, date as DD-MMM-YYYY, and amount in Indian rupee formatting. It MUST sort by expense date descending and entry order descending for equal dates.
+- **FR-005 (ET-4)**: The expense log MUST provide columns for `#`, Expense Name, Category, Date, Amount, and Actions; each row MUST offer Edit and Delete actions. The `#` column MUST show each row's one-based position after sorting.
+- **FR-006 (ET-4)**: The log MUST display “No expenses recorded yet” when empty and MUST correctly display one or at least 50 entries.
+- **FR-007 (ET-4)**: The log MUST retain the ET-3 date and entry-order sorting. Amounts MUST be shown in INR with exactly two decimal places, rounded to the nearest paise for display; calculations and stored values MUST retain the original amount precision. Digits in the Amount column MUST align consistently.
+- **FR-008 (ET-4)**: On mobile-width screens, a log wider than the viewport MUST support horizontal scrolling without breaking the page layout.
+- **FR-009 (ET-5)**: Selecting Edit on a log row MUST populate the expense form with that row's values, highlight the row, and change the submit button label to “Update Expense.”
+- **FR-010 (ET-5)**: Submitting a valid edit MUST update the selected expense in place. If its date changes, the log MUST be re-sorted. ET-3 validation rules MUST apply to edited values.
+- **FR-011 (ET-5)**: Canceling an edit MUST leave expense data unchanged and return the form to blank add mode.
+- **FR-012 (ET-5)**: At most one row MUST be in edit mode. Selecting Edit on another row MUST replace the active row in the form.
+- **FR-013 (ET-6)**: Selecting Delete MUST show an inline row-level prompt containing “Delete this entry?”, Confirm, and Cancel. It MUST NOT use a browser confirmation dialog.
+- **FR-014 (ET-6)**: Canceling a deletion MUST leave the expense unchanged. Confirming MUST remove it and immediately update the log and summary.
+- **FR-015 (ET-6/ET-7)**: A category-month cell with no matching expenses MUST display ₹0.00 when that month remains in the summary; a month with no remaining expenses MUST not appear as a summary column.
+- **FR-016 (ET-7)**: The summary MUST show all eight categories as rows, months with at least one expense as columns in chronological order, and a rightmost Total column. Each category-month value and category total MUST equal the corresponding expense sums, calculated from unrounded stored amounts, and display as ₹X,XXX.00 rounded to the nearest paise.
+- **FR-017 (ET-7)**: The summary MUST include a bottom “Grand Total” row with per-month and overall totals calculated from unrounded stored amounts and displayed rounded to the nearest paise. With no expenses, it MUST show all eight categories at ₹0.00 in a Total column and no month columns.
+- **FR-018 (ET-7)**: Adding, editing, or deleting an expense MUST immediately update affected summary amounts and totals. Adding the first expense in a month MUST add that month's column.
+- **FR-019 (ET-7)**: The summary MUST support horizontal scrolling when wider than the viewport while keeping the category column visible.
 
-### Key Entities *(include if feature involves data)*
+### Key Entities
 
-- **Expense**: A spending record with a name, one supported category, an expense date, and an amount in Indian rupees.
-- **Basic Expense Log**: A visible list of accepted expenses ordered by expense date descending and insertion order descending for equal dates, with dates shown as DD-MMM-YYYY and INR amounts using Indian number formatting.
+- **Expense**: A spending record with an expense name, supported category, expense date, and INR amount.
+- **Expense Log**: An ordered table of expense records with row-level edit and delete actions.
+- **Category-Month Summary**: A matrix of category spending by month, with category totals and a grand-total row.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: Every valid ET-3 submission adds exactly one expense and displays it immediately in date-descending order; ties display newest insertion first. The form resets and the page does not reload. Every invalid submission adds zero expenses, leaves the log unchanged, and shows inline errors for invalid fields.
-- **SC-002**: Future-dated and duplicate valid entries are both accepted and displayed.
+- **SC-001**: 100% of valid expense submissions add exactly one expense and display it in the log; 100% of invalid submissions add none and identify each invalid field.
+- **SC-002**: Users can locate each expense's name, category, date, amount, and available actions in the log, including when there are at least 50 records.
+- **SC-003**: The log and summary remain operable at mobile viewport widths, with no page-layout break caused by table width.
+- **SC-004**: A user can edit one selected expense, cancel without changing it, and confirm a deletion with the corresponding log and summary values updated immediately.
+- **SC-005**: For any set of expenses, all displayed category-month totals, category totals, monthly grand totals, and the overall grand total equal the corresponding sums of expense amounts.
 
 ## Assumptions
 
-- The feature is the ET-3 browser-only add-expense story within epic ET-2; expense data remains in memory only at this stage.
-- The category choices are the eight categories listed in the ET-3 Jira story and project data model.
-- The expense date defaults to the user's local current date; future dates and duplicate entries are allowed.
-- New entries follow date-descending order, with insertion order descending as the tie-breaker for the same date.
-- The basic log shows enough expense fields to identify each accepted record; full log columns, row actions, empty-state behavior, and responsive scrolling are deferred to ET-4.
+- ET-3 is complete; its requirements are retained as context and as the validation rules reused by ET-5.
+- The project’s eight supported categories and INR/date display conventions remain unchanged.
+- ET-4 through ET-7 are specified in their Jira order. Story priorities indicate a reasonable delivery order; Jira story names and acceptance-criteria scope are preserved.
+- An empty category-month intersection is displayed as ₹0.00 when its month remains present. A month column is omitted or removed when it has no expenses in any category; this reconciles ET-6's zero-or-blank choice with ET-7's totals and month-column rules.
+- Expense records remain in the current page session; persistence beyond the current session is outside this epic's defined story scope.
