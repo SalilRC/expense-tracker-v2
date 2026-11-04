@@ -24,14 +24,14 @@
 
 **Alternatives considered:** Persistent browser storage and duplicate prevention, both of which introduce behavior outside the story requirements.
 
-## Decision: Keep the three requested source files and use a narrow `app.js` exception for error rendering
+## Decision: Keep CRUD, log rendering, and form orchestration in their designated modules
 
-**Rationale:** The user confirmed the exact ET-3 scope as an exception. `modules/store.js` remains DOM-free and owns state and domain validation; `app.js` owns form event orchestration and only the inline error DOM operations needed by this story.
+**Rationale:** The user kept this feature scoped to ET-3 and approved adding only the basic log display needed to satisfy ET-3's visible-log acceptance criterion. `modules/store.js` remains DOM-free and owns state and domain validation; `modules/ui.js` owns the basic log and inline validation rendering; `app.js` owns form event orchestration.
 
-**Alternatives considered:** Add `modules/ui.js` to scope to preserve the constitution's usual rendering boundary, or put DOM logic in the store. The first conflicts with the user's explicit three-file limit; the second would violate the separation between state and rendering. The approved exception is limited to the ET-3 form.
+**Alternatives considered:** Put DOM logic in the store, which would violate the separation between state and rendering. Full ET-4 log behavior and ET-5–ET-7 remain deferred.
 
 ## Decision: Use focused Jest tests and no new runtime dependencies
 
-**Rationale:** Jest is the project's declared test command and no external runtime dependencies are necessary. Tests should exercise the store independently and verify the submit handler's observable behavior, including reset and no navigation.
+**Rationale:** Jest is the project's declared test command and no external runtime dependencies are necessary. Tests should exercise store validation, the basic log renderer, and the submit handler's observable behavior, including display ordering, reset, and no navigation.
 
 **Alternatives considered:** Add a test framework or browser automation dependency during planning; no need is established for this story.

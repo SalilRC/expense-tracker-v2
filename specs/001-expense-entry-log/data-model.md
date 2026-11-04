@@ -17,9 +17,13 @@ Duplicate expenses are allowed. The collection is held in module memory and last
 
 ## Form submission
 
-The form submits `name`, `category`, `date`, and `amount`. Empty or invalid values must not mutate the expense collection. Errors are associated with their respective fields and rendered inline by `app.js` under the ET-3-only exception recorded in [plan.md](./plan.md).
+The form submits `name`, `category`, `date`, and `amount`. Empty or invalid values must not mutate the expense collection. Errors are associated with their respective fields and rendered inline by `modules/ui.js`.
 
 On successful add, the store adds exactly one `Expense`. The UI clears validation feedback, clears the form's name/category/amount values, and restores the date field to the browser's local current date.
+
+## Basic Expense Log
+
+The visible ET-3 log contains accepted expenses with enough information to identify each record: name, category, date, and amount. It is rendered in expense-date descending order; records with the same expense date appear in reverse insertion order. Dates are displayed as `DD-MMM-YYYY`, and INR amounts are formatted with `toLocaleString('en-IN')`. Full ET-4 columns, row actions, empty-state rules, large-list requirements, and mobile scrolling are deferred.
 
 ## Validation and state transitions
 
