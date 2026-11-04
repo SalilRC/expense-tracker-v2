@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main>
+      <h1>Expense Tracker</h1>
+
+      <section aria-labelledby="expense-form-heading">
+        <h2 id="expense-form-heading">Add an Expense</h2>
+        <form id="expense-form" novalidate>
+          <div>
+            <label for="expense-name">Expense Name</label>
+            <input
+              id="expense-name"
+              name="name"
+              type="text"
+              required
+              aria-describedby="name-error"
+            >
+            <span id="name-error" aria-live="polite"></span>
+          </div>
+
+          <div>
+            <label for="expense-category">Category</label>
+            <select
+              id="expense-category"
+              name="category"
+              required
+              aria-describedby="category-error"
+            >
+              <option value="">Select a category</option>
+              <option>Groceries</option>
+              <option>Outside Food</option>
+              <option>Fuel</option>
+              <option>Travel</option>
+              <option>Leisure</option>
+              <option>Medicines</option>
+              <option>Utilities</option>
+              <option>Others</option>
+            </select>
+            <span id="category-error" aria-live="polite"></span>
+          </div>
+
+          <div>
+            <label for="expense-date">Expense Date</label>
+            <input
+              id="expense-date"
+              name="date"
+              type="date"
+              required
+              aria-describedby="date-error"
+            >
+            <span id="date-error" aria-live="polite"></span>
+          </div>
+
+          <div>
+            <label for="expense-amount">Amount in ₹</label>
+            <input
+              id="expense-amount"
+              name="amount"
+              type="number"
+              min="0.01"
+              step="any"
+              required
+              aria-describedby="amount-error"
+            >
+            <span id="amount-error" aria-live="polite"></span>
+          </div>
+
+          <button type="submit">Add Expense</button>
+        </form>
+      </section>
+
+      <section aria-labelledby="expense-log-heading">
+        <h2 id="expense-log-heading">Expense Log</h2>
+        <div id="expense-log"></div>
+      </section>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

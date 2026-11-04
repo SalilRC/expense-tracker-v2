@@ -2,9 +2,13 @@
   "name": "expense-tracker-v2",
   "version": "0.1.0",
   "description": "Personal expense tracker — vanilla JS, SDD with Spec Kit",
+  "type": "module",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
     "lint": "eslint modules/ app.js"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2"
+  }
 }
