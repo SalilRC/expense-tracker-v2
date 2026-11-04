@@ -1,32 +1,36 @@
-# Expense Entry Form Contract (ET-3)
+# Expense Entry Form Contract (ET-3 and ET-5)
 
-This is the user-facing contract for the browser form; it introduces no network API.
+This is the user-facing contract for adding and editing expenses; it introduces no network API.
 
-## Inputs
+## Fields
 
-| Field | Control | Required behavior |
-|-------|---------|-------------------|
-| Expense Name | Text input | Required; associated visible label. |
-| Category | Select | Required; exactly the eight supported project categories. |
-| Expense Date | Date input | Required; initialized to local today; future dates allowed. |
-| Amount in ₹ | Number input | Required; minimum `0.01`; do not impose an unstated precision restriction. |
+| Field | Required behavior |
+|-------|-------------------|
+| Expense Name | Required; non-empty after trimming. |
+| Category | Required; exactly the eight supported project categories. |
+| Expense Date | Required; valid calendar date; defaults to local today in add mode. |
+| Amount in ₹ | Required; finite and at least `0.01`; no additional precision restriction is imposed by ET-3. |
 
-Each control has an associated inline error target. The form may expose invalid values through accessible invalid-state attributes and error descriptions. The submit button submits the form.
+Each control has a visible label and an associated inline error target. The form must expose invalid state accessibly. The form does not use native browser validation bubbles as its only error feedback.
 
-## Submit behavior
+## Add mode
 
-- Submitting the form does not navigate or reload the page.
-- If any required value is missing or invalid, show a field-specific inline error and do not add an expense.
-- On valid submission, add exactly one expense to the in-memory store and display it immediately in the basic log. Duplicate entries are accepted.
-- The basic log shows expense name, category, date (`DD-MMM-YYYY`), and INR amount (`toLocaleString('en-IN')`) in expense-date descending order, with newest insertion first for equal dates.
-- On success, clear error feedback, reset the name/category/amount values, and reset the date to local today.
+- A valid submission adds exactly one expense, updates the log and summary, and resets the form to add mode with the date set to local today.
+- An invalid submission shows field-specific inline errors, leaves expense state and views unchanged, and preserves entered values for correction.
+- Duplicate and future-dated expenses are accepted.
+- Submission does not navigate or reload the page.
 
-## Module boundaries
+## Edit mode (ET-5)
 
-- `modules/store.js` provides `addExpense(input)` for validating and adding one record and `getExpenses()` for reading the current in-memory records.
-- `modules/ui.js` provides `renderExpenseLog(expenses)`, `renderExpenseErrors(form, errors)`, and `clearExpenseErrors(form)` for all DOM rendering.
-- `app.js` handles form submission, calls the store and UI functions, and resets the form after a successful add.
+- Selecting Edit on a log row populates this form with that expense's name, category, date, and amount; highlights the row; and changes the submit button label to “Update Expense.”
+- Only one row can be in edit mode; selecting another row replaces the active edit.
+- Updates use the same validation rules as add and retain the expense identity and creation timestamp.
+- A valid update changes the selected record, refreshes the log and summary, and returns the form to add mode. The log is re-sorted if the expense date changed.
+- Cancel exits edit mode without changing the expense and restores blank add mode with local today.
 
-## Out of scope
+## Module responsibilities
 
-Persistence, server requests, editing, deletion, the full ET-4 expense-log table behavior, and summary rendering are not part of ET-3.
+- `modules/store.js` owns add, read, update, and delete operations and validates expense records.
+- `modules/analytics.js` provides pure calculations for category/month amounts and totals.
+- `modules/ui.js` owns all DOM rendering, including form feedback, log rows, edit highlighting, delete confirmation, and summary.
+- `app.js` coordinates user events and refreshes the UI from store state.

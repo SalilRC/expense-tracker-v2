@@ -91,6 +91,36 @@ export function addExpense(input) {
   return { expense: { ...expense }, errors: {} };
 }
 
+export function updateExpense(id, input) {
+  const index = expenses.findIndex((expense) => expense.id === id);
+  if (index === -1) {
+    return { expense: null, errors: { id: 'Expense was not found.' } };
+  }
+
+  const { errors, normalized } = validateExpense(input);
+  if (Object.keys(errors).length > 0) {
+    return { expense: null, errors };
+  }
+
+  const updatedExpense = {
+    ...expenses[index],
+    ...normalized,
+  };
+  expenses[index] = updatedExpense;
+
+  return { expense: { ...updatedExpense }, errors: {} };
+}
+
+export function deleteExpense(id) {
+  const index = expenses.findIndex((expense) => expense.id === id);
+  if (index === -1) {
+    return { deleted: false, expense: null };
+  }
+
+  const [expense] = expenses.splice(index, 1);
+  return { deleted: true, expense: { ...expense } };
+}
+
 export function getExpenses() {
   return expenses.map((expense) => ({ ...expense }));
 }

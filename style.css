@@ -1,0 +1,159 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #17212b;
+  background: #f3f6f8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 20rem;
+}
+
+main {
+  width: min(100% - 2rem, 72rem);
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+section {
+  margin-block: 2rem;
+  padding: 1.25rem;
+  border: 1px solid #d6dfe5;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 0.25rem 1rem rgb(20 40 60 / 5%);
+}
+
+h1,
+h2 {
+  margin-top: 0;
+}
+
+form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 1rem;
+}
+
+form > div {
+  display: grid;
+  align-content: start;
+  gap: 0.4rem;
+}
+
+input,
+select,
+button {
+  min-height: 2.6rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #aebcc6;
+  border-radius: 0.4rem;
+  font: inherit;
+}
+
+button {
+  width: fit-content;
+  cursor: pointer;
+  color: #fff;
+  border-color: #145d77;
+  background: #145d77;
+}
+
+button:hover {
+  background: #0e485e;
+}
+
+.form-actions {
+  display: flex;
+  align-items: end;
+  gap: 0.6rem;
+}
+
+[aria-invalid="true"] {
+  border-color: #b42318;
+}
+
+[id$="-error"] {
+  min-height: 1.2em;
+  color: #b42318;
+}
+
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.7rem;
+  border-bottom: 1px solid #e1e7eb;
+  text-align: left;
+  white-space: nowrap;
+}
+
+thead th {
+  background: #eef3f6;
+}
+
+tbody tr[data-editing="true"] {
+  outline: 2px solid #2684a3;
+  outline-offset: -2px;
+  background: #eaf7fb;
+}
+
+.expense-log-scroll table {
+  min-width: 48rem;
+}
+
+.expense-summary-scroll table {
+  min-width: max-content;
+}
+
+.expense-summary-scroll thead th:first-child,
+.expense-summary-scroll tbody th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #eef3f6;
+}
+
+.expense-summary-scroll tbody th:first-child {
+  background: #fff;
+}
+
+.expense-log-scroll td:nth-child(5),
+.expense-summary-scroll td {
+  font-variant-numeric: tabular-nums;
+}
+
+.expense-log-scroll td:last-child {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.expense-log-scroll td:last-child button {
+  min-height: 2rem;
+  padding: 0.25rem 0.5rem;
+}
+
+@media (max-width: 40rem) {
+  main {
+    width: min(100% - 1rem, 72rem);
+    padding-top: 1rem;
+  }
+
+  section {
+    padding: 0.8rem;
+  }
+}

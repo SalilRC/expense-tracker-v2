@@ -1,37 +1,49 @@
-# Research: Add an Expense Entry (ET-3)
+# Research: Expense Entry and Log View (ET-2)
 
-## Decision: Keep validation at both the form and store boundaries
+## Decision: Extend the existing in-memory store with identity-based updates and deletion
 
-**Rationale:** Native HTML constraints (`required`, appropriate input types, and a minimum amount) provide useful browser semantics. The store must still reject invalid domain data independently so invalid records cannot enter module state through a non-form caller. The submit handler should display all applicable field errors inline rather than relying on a browser validation bubble.
+**Rationale:** ET-3 already owns the expense collection and validation rules. Update and delete operations belong beside add/get so each change has one state owner, updates can preserve the expense identity and creation timestamp, and the UI does not mutate records directly.
 
-**Alternatives considered:** Rely only on native browser validation, which does not provide the required field-specific inline messages; validate only in `app.js`, which would leave the state boundary unprotected.
+**Alternatives considered:** Keep editable state in the form or table, which would create competing sources of truth; introduce persistence or a backend, which is outside Stage 1 and ET-2.
 
-## Decision: Use a native date input with local-today initialization
+## Decision: Keep summary aggregation pure and separate from rendering
 
-**Rationale:** The date picker returns the required `YYYY-MM-DD` value. Generate the default from the browser's local calendar date rather than UTC so users near a UTC date boundary see their local today. Do not set a maximum date: ET-3 explicitly permits future dates. Restore the date to local today after a successful reset.
+**Rationale:** Category/month bucketing and totals are domain transformations that can be unit-tested without a DOM. A pure calculation can return the ordered month keys, fixed category rows, cell amounts, category totals, and grand totals. `modules/ui.js` can then render that result without embedding business calculations.
 
-**Alternatives considered:** Use a UTC ISO date substring, which can select the wrong local calendar day; restrict the maximum date to today, which violates the acceptance criteria.
+**Alternatives considered:** Calculate totals during DOM rendering, which couples correctness to markup; maintain separate mutable summary state, which risks drifting from expense CRUD state.
 
-## Decision: Use a numeric amount input with the specified ₹0.01 minimum
+## Decision: Use expense date as the summary month and chronological month keys
 
-**Rationale:** The acceptance criteria specify a numeric input and minimum of ₹0.01 but do not constrain precision. Use `min="0.01"` and `step="any"` to avoid imposing an unstated precision limit. Validate finite numeric input and the minimum again in the store.
+**Rationale:** The story summarizes spending by category and month, so each expense is grouped by the month portion of its expense date. The visible month columns are the distinct months present in current expenses, ordered oldest to newest; removing the last expense for a month removes its column.
 
-**Alternatives considered:** Leave the default number step of 1, which rejects ordinary fractional INR amounts; use `step="0.01"`, which would add a two-decimal increment rule not stated in ET-3.
+**Alternatives considered:** Group by creation timestamp, which would classify expenses under the recording month rather than the date of the spending; preserve empty month columns, which conflicts with ET-7's “month that has at least one expense” requirement.
 
-## Decision: Allow duplicates and future dates; keep records in memory
+## Decision: Keep sorting deterministic across add and edit
 
-**Rationale:** ET-3 explicitly allows both duplicates and future dates and requires in-memory session state only. The add path must not add uniqueness checks, date caps, local storage, or a backend.
+**Rationale:** The log sorts expense date descending and insertion order descending for equal dates. Store order is the stable tie-break source: a successful edit updates the existing record without changing its insertion position or identity. Re-rendering after an edit that changes the date naturally places the record in its new date group.
 
-**Alternatives considered:** Persistent browser storage and duplicate prevention, both of which introduce behavior outside the story requirements.
+**Alternatives considered:** Use a new timestamp or identifier as the tie-breaker, which does not directly represent entry order and can change on edit.
 
-## Decision: Keep CRUD, log rendering, and form orchestration in their designated modules
+## Decision: Use the existing form for edit mode and inline row confirmation for delete
 
-**Rationale:** The user kept this feature scoped to ET-3 and approved adding only the basic log display needed to satisfy ET-3's visible-log acceptance criterion. `modules/store.js` remains DOM-free and owns state and domain validation; `modules/ui.js` owns the basic log and inline validation rendering; `app.js` owns form event orchestration.
+**Rationale:** ET-5 explicitly requires selecting Edit to populate the existing form and changing its button label. The same form validation applies; Cancel exits edit mode without mutation. ET-6 explicitly requires a row-level inline prompt and prohibits browser confirmation dialogs.
 
-**Alternatives considered:** Put DOM logic in the store, which would violate the separation between state and rendering. Full ET-4 log behavior and ET-5–ET-7 remain deferred.
+**Alternatives considered:** Separate edit forms or modal dialogs, which do not match the stated acceptance criteria; browser `confirm()`, which violates both ET-6 and the project constitution.
 
-## Decision: Use focused Jest tests and no new runtime dependencies
+## Decision: Format list and summary amounts as INR with two fractional digits
 
-**Rationale:** Jest is the project's declared test command and no external runtime dependencies are necessary. Tests should exercise store validation, the basic log renderer, and the submit handler's observable behavior, including display ordering, reset, and no navigation.
+**Rationale:** ET-4 requires two decimal places in the Amount column and ET-7 specifies ₹X,XXX.00 cell values. Use the project's Indian locale formatting convention while ensuring the specified fixed precision for these tables. Dates remain `DD-MMM-YYYY`.
 
-**Alternatives considered:** Add a test framework or browser automation dependency during planning; no need is established for this story.
+**Alternatives considered:** Variable precision, which would violate the story criteria; storing formatted strings in the expense state, which would impair arithmetic and validation.
+
+## Decision: Preserve responsive tables through horizontal scrolling and sticky category labels
+
+**Rationale:** ET-4 requires the log to scroll horizontally on mobile without page overflow; ET-7 requires the summary to scroll with its category column remaining visible. These are presentation concerns and belong in UI markup and stylesheet behavior, not data logic.
+
+**Alternatives considered:** Compressing or hiding required columns, which loses information; allowing the document itself to overflow horizontally, which breaks the page layout.
+
+## Decision: Extend existing Jest coverage and add no runtime dependencies
+
+**Rationale:** The repository already has Jest/jsdom and focused store, UI, and app tests. Pure aggregation can be tested in a dedicated `tests/analytics.test.js`; DOM interactions remain covered by UI/app tests, and browser smoke checks verify responsive behavior.
+
+**Alternatives considered:** Add another unit-test framework or browser automation dependency; neither is necessary for the specified behavior.

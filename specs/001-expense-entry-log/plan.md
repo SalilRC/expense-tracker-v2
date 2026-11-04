@@ -1,45 +1,46 @@
-# Implementation Plan: Add an Expense Entry (ET-3)
+# Implementation Plan: Expense Entry and Log View (ET-2)
 
-**Branch**: `001-expense-entry-log` | **Date**: 2026-11-01 | **Spec**: [spec.md](./spec.md)
+**Branch**: `ET-1.2-to-1.5-expense-entry-and-view` | **Date**: 2026-11-04 | **Spec**: [spec.md](./spec.md)
 
-**Input**: Jira story ET-3, “Add an Expense Entry.” This plan covers the form, in-memory store, submit orchestration, and the minimal log rendering required to show accepted entries. Full ET-4 log behavior and ET-5–ET-7 remain deferred.
+**Input**: Jira epic ET-2, “Expense entry and log view.” ET-3 is complete. This plan covers the remaining child stories ET-4 (Expense Log Table), ET-5 (Edit an Expense Row), ET-6 (Delete an Expense Row), and ET-7 (Category × Month Summary Table), preserving their Jira names and acceptance criteria.
 
 ## Summary
 
-Implement a browser-only expense form that accepts a required name, supported category, date, and positive INR amount. The form defaults to the user's local date, shows field-specific inline validation errors, and adds valid entries to in-memory state without a page reload. After a successful add, render the updated basic expense log immediately, then reset the fields and restore the local-today date. The store remains responsible for creating and validating expense records; `modules/ui.js` owns DOM rendering for the log and validation feedback, while the submit handler coordinates store calls, rendering, and form reset.
+Extend the existing browser-only expense tracker from the completed ET-3 add flow into the complete ET-2 log and summary experience. The in-memory store will support validated updates and deletions as well as additions. The UI module will render the full sorted log, edit/delete states, inline confirmation, and category-by-month summary; pure summary calculations will remain independently testable. The app module will coordinate user events and refresh affected views after state changes. Responsive table behavior, accessible actions and inline prompts, and all monetary/date formats will be verified without adding a framework, backend, persistence layer, or build tool.
 
 ## Technical Context
 
-**Language/Version**: Browser-native JavaScript (ES modules), HTML5
+**Language/Version**: Browser-native JavaScript ES modules and HTML5
 
-**Primary Dependencies**: None; no framework or build tool
+**Primary Dependencies**: Existing Jest and jsdom development dependencies; no new runtime dependencies
 
-**Storage**: In-memory JavaScript module state for the current page session
+**Storage**: Existing in-memory expense collection for the current page session
 
-**Testing**: Jest is the project test target (`npm test`); add focused unit tests for `addExpense`, basic log rendering, and submit-handler behavior in `tests/`. The current package manifest has the test script but no declared dev dependencies and the tests directory has no test files yet.
+**Testing**: Jest via `npm test`; extend `tests/store.test.js`, `tests/ui.test.js`, and `tests/app.test.js`, and add focused tests for pure summary calculations. Run browser smoke checks for responsive behavior and full user journeys.
 
-**Target Platform**: Modern browser, single-page application
+**Target Platform**: Modern desktop and mobile browsers
 
-**Project Type**: Browser-only web application
+**Project Type**: Browser-only single-page web application
 
-**Performance Goals**: Synchronous local form submission and in-memory update, with no navigation or page reload
+**Performance Goals**: Log, summary, and totals update synchronously after an expense change; 50 or more log entries remain available and correctly ordered.
 
-**Constraints**: Implement `index.html`, `modules/store.js`, `modules/ui.js`, and `app.js`; keep data in memory; use the eight ET-3 categories; accept future dates and duplicate entries; require an amount of at least ₹0.01. All DOM rendering belongs in `modules/ui.js`; `app.js` coordinates form submission and reset behavior. Full ET-4 log features and ET-5–ET-7 are deferred.
+**Constraints**: Preserve ET-3 add behavior and the eight supported categories. Keep stateful CRUD in `modules/store.js`, pure summary calculations in `modules/analytics.js`, and all DOM manipulation/rendering in `modules/ui.js`; `app.js` coordinates event handling only. No persistence, backend, framework, or build tool. Do not use browser `alert()`, `confirm()`, or `prompt()`.
 
-**Scale/Scope**: One add form and an in-memory expense collection for a single browser page session, plus a basic log view that displays accepted expenses in the required order. Full log behavior, editing, deletion, and summary calculations are outside this story plan.
+**Scale/Scope**: One in-memory collection, one complete expense log with row actions, one expense form supporting add/edit, and one category-by-month summary. Work is limited to ET-4–ET-7; ET-3 is a completed dependency and must not regress.
 
 ## Constitution Check
 
 ### Before Phase 0
 
-- **Spec Before Code**: Pass. This plan is based on the existing ET-2 feature spec and ET-3 Jira acceptance criteria; implementation must not precede the approved story requirements.
-- **Vanilla JavaScript in Stage 1**: Pass. The approach uses native HTML and JavaScript only.
-- **Pure Logic and DOM Separation**: Pass. `modules/store.js` remains DOM-free; all log and inline validation DOM rendering is performed by `modules/ui.js`, while `app.js` coordinates submission and form reset.
-- **Testable Completion**: Pass as a plan gate. Cover store validation/add behavior and submission behavior with Jest tests before marking ET-3 Done.
-- **Consistent User-Facing Conventions**: Pass. INR amounts are formatted with `toLocaleString('en-IN')`; expense dates are displayed as `DD-MMM-YYYY` and submitted in `YYYY-MM-DD` form. No browser alert, confirm, or prompt dialogs are needed.
-- **Stage 1 constraints**: Pass. No backend, database, persistence, framework, or build tool is introduced.
+- **Spec Before Code**: Pass. The ET-2 specification captures ET-3 through ET-7 and retains Jira story boundaries. Implementation must follow the approved acceptance scenarios.
+- **Vanilla JavaScript in Stage 1**: Pass. Existing browser-native HTML, CSS, and JavaScript remain in use; no framework or build system is planned.
+- **Pure Logic and DOM Separation**: Pass. CRUD remains in `modules/store.js`, category/month aggregation and totals are pure functions in `modules/analytics.js`, and all DOM rendering remains in `modules/ui.js`.
+- **Testable Completion**: Pass. Extend Jest tests for changed behavior and cover each pure analytics function. Preserve the constitution's minimum 80% line coverage for both `modules/csv.js` and `modules/analytics.js`.
+- **Consistent User-Facing Conventions**: Pass. Amounts remain INR formatted using `toLocaleString('en-IN')`, with exactly two fraction digits where ET-4/ET-7 require them. Dates remain `DD-MMM-YYYY`. Delete confirmation and validation feedback use inline UI.
+- **Stage 1 constraints**: Pass. State stays in memory; no backend, database, persistence, framework, or bundler is introduced.
+- **Epic branch naming**: Exception. The current branch is `ET-1.2-to-1.5-expense-entry-and-view`, which does not follow the constitution's `ET-2-...` epic naming convention. The user directed continuing on the current branch; no branch change was made.
 
-No unresolved requirements or technical clarifications remain for this scoped story.
+No pre-design technical clarifications remain. The branch naming exception is documented below.
 
 ## Project Structure
 
@@ -51,36 +52,51 @@ specs/001-expense-entry-log/
 ├── research.md
 ├── data-model.md
 ├── quickstart.md
-└── contracts/
-    └── expense-entry-form.md
+├── contracts/
+│   ├── expense-entry-form.md
+│   └── expense-log-and-summary.md
+└── tasks.md
 ```
 
 ### Source Code (repository root)
 
 ```text
 index.html
+style.css
 app.js
 modules/
 ├── store.js
-└── ui.js
+├── ui.js
+└── analytics.js
 tests/
-└── focused ET-3 Jest tests
+├── app.test.js
+├── store.test.js
+├── ui.test.js
+└── analytics.test.js
 ```
 
-**Structure Decision**: Use the existing single-project, browser-only structure. Keep expense state and validation in `modules/store.js`; render the basic log and inline validation feedback through `modules/ui.js`; use `app.js` for event wiring and submission orchestration.
+**Structure Decision**: Retain the existing single-project layout. Extend the store for CRUD, add pure category/month calculations in the planned `modules/analytics.js`, extend the UI renderer for the full log and summary, and keep `app.js` focused on orchestration. Use the existing HTML entry point and stylesheet for semantic markup, responsive wrappers, and sticky summary category behavior.
 
 ## Implementation Sequence
 
-1. Add semantic, labeled form controls, per-field inline error targets, and a basic expense-log container in `index.html`, including native required/type/minimum constraints, no unstated amount precision limit, and the ET-3 category choices.
-2. Implement the in-memory expense collection, `addExpense(input)`, and `getExpenses()` in `modules/store.js`. Validate the complete input before mutation; create the expense identity and creation timestamp on success.
-3. Implement `renderExpenseLog(expenses)` in `modules/ui.js` to display accepted expenses in date-descending order and insertion order descending for equal dates.
-4. Wire the form `submit` event in `app.js`. Prevent navigation, validate/submit through the store, call the UI validation renderer for invalid fields, and on success call `renderExpenseLog(getExpenses())`, clear validation feedback through the UI module, and reset the form while setting its date back to local today.
-5. Add and run focused Jest tests for valid adds, invalid fields, future dates, duplicates, immediate log rendering and order, reset/default date, and prevention of page navigation.
+1. **ET-4 — Expense Log Table**: Extend the existing log to render `#`, Expense Name, Category, Date, Amount, and Actions; preserve date-descending and same-date reverse-entry ordering; show the required empty state; use fixed two-decimal INR display and aligned amount digits; provide horizontal scrolling on narrow screens. Render Edit/Delete controls as the specified row actions, with their behaviors completed in ET-5 and ET-6.
+2. **ET-5 — Edit an Expense Row**: Add a validated store update operation that retains the expense identity and creation time; populate the existing form from a selected row; visibly highlight the edited row; switch the submit label to “Update Expense”; support cancel and switching the active row; re-sort after date changes and apply ET-3 validation rules. Centralize successful log and summary refresh so each add/edit/delete event invokes the same render coordination.
+3. **ET-7 — Category × Month Summary Table**: Add pure calculations for chronological expense months, eight category rows, category-month values, category totals, monthly totals, and grand total. Render the empty state with all categories and a Total column, update after add/edit/delete changes, and provide horizontally scrollable layout with a sticky category column. Calculate using original stored precision and round only displayed totals to the nearest paise.
+4. **ET-6 — Delete an Expense Row**: Add deletion by expense identity and row-level inline confirmation with Confirm/Cancel. Cancel leaves state unchanged; confirm removes one expense, refreshes the log, and refreshes the summary. Show ₹0.00 for a category-month intersection without expenses when the month remains; remove a month column after its last expense is deleted.
+5. **Cross-story verification**: Exercise combined add, edit, cancel, delete, sorting, summary, empty-state, and responsive scenarios; run the focused Jest suite and the browser checks in [quickstart.md](./quickstart.md). Preserve all ET-3 tests and behavior.
+
+**Dependency note**: ET-7's summary renderer/calculations must be in place before ET-6 can verify that confirmed deletion refreshes both views. The Jira story order is preserved in scope, while implementation sequence accounts for that acceptance-criteria dependency.
 
 ## Complexity Tracking
 
-No exceptions to the project constitution are required.
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|--------------------------------------|
+| Current branch does not follow the ET-2 epic naming convention | User explicitly chose to continue on the existing branch for this planning work. | Switching branches would disrupt the current work context; no branch change was requested. |
 
-## Deferred Scope
+## Scope Boundaries
 
-The full ET-4 expense-log table, edit behavior (ET-5), deletion behavior (ET-6), and category-by-month summary (ET-7) are not part of this plan. See [spec.md](./spec.md) for the deferred story boundaries.
+- ET-3 is complete and is not reimplemented; it is regression-tested and supplies the shared add form and expense rules.
+- ET-4 defines the full table and action controls; edit and delete behavior belongs to ET-5 and ET-6 respectively.
+- ET-5 and ET-6 change only in-memory expense state; persistence and undo are not specified.
+- ET-7 derives its rows, month columns, and totals from current expenses. Months with no remaining expenses are omitted; categories without expenses for a month display ₹0.00 when that month exists.
+- CSV import/export and analytics beyond the ET-7 category-by-month summary are outside ET-2.
